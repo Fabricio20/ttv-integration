@@ -14,6 +14,15 @@ java {
     }
 }
 
+bootJar {
+    archiveFileName = "${project.name}.${archiveExtension.get()}"
+}
+
+bootBuildImage {
+    imageName = "ghcr.io/fabricio20/${project.name}"
+    createdDate = "now"
+}
+
 repositories {
     mavenCentral()
 }
