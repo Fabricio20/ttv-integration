@@ -1,0 +1,63 @@
+name: Build server
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ttv-server/**
+      - ttv-common/**
+      - .github/workflows/ttv-server.yml
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ttv-server/**
+      - ttv-common/**
+      - .github/workflows/ttv-server.yml
+  workflow_dispatch:
+    branches: [ master ]
+env:
+  IMAGE_NAME: ghcr.io/fabricio20/ttv-server
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v2
+      # JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+      # Login to registry
+      - name: Log into registry
+        if: github.event_name == 'push'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      # Pull old image
+      - name: Pull old image
+        run: docker pull "${{ env.IMAGE_NAME }}:latest"
+        continue-on-error: true
+      # Build with gradle
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew :ttv-server:bootBuildImage
+        env:
+          USERNAME: ${{ github.actor }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Push docker image
+      - name: Push image
+        if: github.event_name == 'push'
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo VERSION=$VERSION
+          
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$VERSION
+          docker push $IMAGE_NAME:$VERSION

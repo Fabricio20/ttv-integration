@@ -1,0 +1,4 @@
+rootProject.name = 'ttv-shared-integrations'
+include('ttv-common')
+include('ttv-server')
+include('ttv-client')

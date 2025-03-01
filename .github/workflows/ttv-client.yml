@@ -1,0 +1,32 @@
+name: Build client
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ttv-client/**
+      - ttv-common/**
+      - .github/workflows/ttv-client.yml
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ttv-client/**
+      - ttv-common/**
+      - .github/workflows/ttv-client.yml
+  workflow_dispatch:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+      # Build with gradle
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew :ttv-client:bootJar
