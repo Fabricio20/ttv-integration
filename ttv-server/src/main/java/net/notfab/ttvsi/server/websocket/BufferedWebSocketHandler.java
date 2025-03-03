@@ -167,6 +167,9 @@ public class BufferedWebSocketHandler extends TextWebSocketHandler implements Ex
      */
     @Override
     public void expired(UUID uuid, Queue<NetworkEvent> buffer) {
+        if (this.sessions.containsKey(uuid)) {
+            return;
+        }
         this.rooms.forEach((id, room) -> room.remove(uuid));
     }
 
