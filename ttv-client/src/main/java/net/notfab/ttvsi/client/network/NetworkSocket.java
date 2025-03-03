@@ -78,6 +78,7 @@ public class NetworkSocket extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        log.debug("Received from Network: {}", message);
         try {
             NetworkEvent event = mapper.readValue(message, NetworkEvent.class);
             this.publisher.publishEvent(event);

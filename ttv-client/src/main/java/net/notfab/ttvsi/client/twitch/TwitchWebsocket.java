@@ -60,6 +60,7 @@ public class TwitchWebsocket extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        log.debug("Received from Twitch: {}", message);
         JSONObject object = new JSONObject(message);
 
         String type = this.getEventType(object);
